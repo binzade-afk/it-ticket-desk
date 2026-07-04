@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT TICKET DESK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAF1FB;
+    --card:#FFFFFF;
+    --ink:#132447;
+    --slate:#5A6C8C;
+    --slate-light:#9AACC9;
+    --line:#D6E1F3;
+    --blue:#2454C7;
+    --blue-light:#E4EBFB;
+    --blue-deep:#0E1E3D;
+    --amber:#C97A2B;
+    --amber-light:#F8EADA;
+    --red:#A63A2E;
+    --red-light:#F5E2DE;
+    --darkred:#6E2419;
+    --darkred-light:#EBD8D4;
+    --green:#2E7D63;
+    --green-light:#DEEFE8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(90deg, rgba(36,84,199,0.06) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(36,84,199,0.06) 1px, transparent 1px),
+      radial-gradient(circle, rgba(36,84,199,0.16) 1.4px, transparent 1.6px);
+    background-size:46px 46px, 46px 46px, 46px 46px;
+    background-attachment:fixed;
+    position:relative;
+  }
+  .circuit{
+    position:fixed;
+    pointer-events:none;
+    z-index:0;
+    opacity:0.14;
+  }
+  .circuit.tr{ top:-40px; right:-40px; width:340px; height:340px; }
+  .circuit.bl{ bottom:-40px; left:-40px; width:300px; height:300px; transform:rotate(180deg); }
+
+  .wrap{
+    position:relative;
+    z-index:1;
+    max-width:1040px;
+    margin:0 auto;
+    padding:40px 24px 80px;
+  }
+  header.top{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    margin-bottom:36px;
+    gap:10px;
+  }
+  header.top .badge{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    background:linear-gradient(145deg, #2454C7, #133C9E);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 20px rgba(36,84,199,0.35);
+    margin-bottom:4px;
+  }
+  header.top h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:30px;
+    margin:0;
+    letter-spacing:0.03em;
+    color:var(--blue-deep);
+  }
+  header.top .subtitle{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--slate);
+    letter-spacing:0.04em;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 300px;
+    gap:0;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 12px 32px rgba(19,36,71,0.08);
+  }
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr;}
+    .stub{border-top:1px dashed var(--line); border-left:none !important;}
+  }
+
+  form.panel{
+    padding:32px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--slate);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .field input[type=text],
+  .field input[type=email],
+  .field input[type=tel],
+  .field select,
+  .field textarea{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .field textarea{
+    resize:vertical;
+    min-height:90px;
+    line-height:1.5;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    outline:none;
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px var(--blue-light);
+  }
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:500px){.row2{grid-template-columns:1fr;}}
+
+  .priority-picker{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .priority-picker input{display:none;}
+  .priority-picker label{
+    text-align:center;
+    padding:9px 4px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--slate);
+    text-transform:none;
+    letter-spacing:0;
+    margin:0;
+  }
+  .priority-picker input:checked + label.p-low{background:var(--green-light);border-color:var(--green);color:var(--green);}
+  .priority-picker input:checked + label.p-medium{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+  .priority-picker input:checked + label.p-high{background:var(--red-light);border-color:var(--red);color:var(--red);}
+  .priority-picker input:checked + label.p-critical{background:var(--darkred-light);border-color:var(--darkred);color:var(--darkred);}
+
+  .submit-btn{
+    margin-top:8px;
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:13px 18px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .submit-btn:hover{background:#173C99;}
+  .submit-btn:disabled{background:var(--slate-light);cursor:not-allowed;}
+
+  .msg{
+    font-size:13px;
+    line-height:1.55;
+    padding:14px 16px 14px 14px;
+    border-radius:10px;
+    display:none;
+    gap:11px;
+    border-left:4px solid transparent;
+    box-shadow:0 6px 18px rgba(19,36,71,0.06);
+  }
+  .msg.show{display:flex;}
+  .msg .msg-icon{
+    flex:none;
+    width:22px;
+    height:22px;
+    margin-top:1px;
+  }
+  .msg .msg-body b{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0.01em;
+  }
+  .msg.err{background:var(--red-light);color:var(--darkred);border-left-color:var(--red);}
+  .msg.ok{background:var(--blue-light);color:var(--blue-deep);border-left-color:var(--blue);}
+
+  /* ticket stub */
+  .stub{
+    background:var(--blue-deep);
+    color:var(--paper);
+    padding:28px 22px;
+    border-left:1px dashed var(--line);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .stub:before{
+    content:"";
+    position:absolute;
+    left:-7px;
+    top:0;
+    bottom:0;
+    width:14px;
+    background-image:radial-gradient(circle, var(--paper) 4px, transparent 4.5px);
+    background-size:14px 22px;
+    background-repeat:repeat-y;
+  }
+  @media (max-width:760px){
+    .stub:before{
+      left:0; right:0; top:-7px; bottom:auto; height:14px; width:auto;
+      background-image:radial-gradient(circle, var(--paper) 4px, transparent 4.5px);
+      background-size:22px 14px;
+      background-repeat:repeat-x;
+    }
+  }
+  .stub .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#7C93C4;
+  }
+  .stub .ticket-id{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:#EAF1FB;
+  }
+  .stub .status-badge{
+    display:inline-block;
+    align-self:flex-start;
+    background:#1D3266;
+    color:#B7C9F2;
+    font-size:11px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:100px;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0.03em;
+  }
+  .stub dl{
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .stub dl div{display:flex; flex-direction:column; gap:2px;}
+  .stub dt{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:#7387B3;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .stub dd{
+    margin:0;
+    font-size:13px;
+    color:#E7ECF8;
+    word-break:break-word;
+  }
+  .stub .priority-tag{
+    align-self:flex-start;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:5px;
+    text-transform:uppercase;
+  }
+  .stub .priority-tag.p-low{background:var(--green);color:#EAF3EE;}
+  .stub .priority-tag.p-medium{background:var(--amber);color:#FCF3E7;}
+  .stub .priority-tag.p-high{background:var(--red);color:#FBEAE7;}
+  .stub .priority-tag.p-critical{background:var(--darkred);color:#F4E4E1;}
+
+</style>
+</head>
+<body>
+
+<svg class="circuit tr" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#2454C7" stroke-width="2">
+    <path d="M340 60 H220 V140 H150"/>
+    <path d="M340 140 H260 V220 H180"/>
+    <path d="M340 220 H300 V300 H240"/>
+    <path d="M260 20 V80 H150"/>
+    <circle cx="150" cy="140" r="6" fill="#2454C7" stroke="none"/>
+    <circle cx="180" cy="220" r="6" fill="#2454C7" stroke="none"/>
+    <circle cx="240" cy="300" r="6" fill="#2454C7" stroke="none"/>
+    <circle cx="150" cy="80" r="6" fill="#2454C7" stroke="none"/>
+    <rect x="255" y="15" width="30" height="30" rx="4"/>
+  </g>
+</svg>
+
+<svg class="circuit bl" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#2454C7" stroke-width="2">
+    <path d="M300 50 H190 V120 H120"/>
+    <path d="M300 120 H230 V190 H150"/>
+    <circle cx="120" cy="120" r="6" fill="#2454C7" stroke="none"/>
+    <circle cx="150" cy="190" r="6" fill="#2454C7" stroke="none"/>
+    <rect x="205" y="5" width="26" height="26" rx="4"/>
+  </g>
+</svg>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="badge">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="4" width="18" height="13" rx="2" stroke="#EAF1FB" stroke-width="1.8"/>
+        <path d="M8 21h8M12 17v4" stroke="#EAF1FB" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M7 9l2 2-2 2M12.5 13h3" stroke="#7FA8F0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>IT TICKET DESK</h1>
+    <span class="subtitle">SUBMIT · TRACK · RESOLVE</span>
+  </header>
+
+  <div class="grid">
+    <form class="panel" id="ticketForm">
+      <div class="field row2">
+        <div>
+          <label for="name">Your name</label>
+          <input type="text" id="name" placeholder="Binzad" required>
+        </div>
+        <div>
+          <label for="email">Work email</label>
+          <input type="email" id="email" placeholder="Binzad.e@expinfi.com" required>
+        </div>
+      </div>
+
+      <div class="field row2">
+        <div>
+          <label for="mobile">Mobile number</label>
+          <input type="tel" id="mobile" placeholder="98765 43210" required>
+        </div>
+        <div>
+          <label for="department">Department</label>
+          <select id="department" required>
+            <option value="" disabled selected>Select department</option>
+            <option>Engineering</option>
+            <option>Sales</option>
+            <option>Marketing</option>
+            <option>Finance</option>
+            <option>HR</option>
+            <option>Operations</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="category">Issue category</label>
+        <select id="category" required>
+          <option value="" disabled selected>Select category</option>
+          <option>Laptop</option>
+          <option>Monitor</option>
+          <option>Keyboard / mouse</option>
+          <option>Printer</option>
+          <option>Software</option>
+          <option>Network / Wi-Fi</option>
+          <option>Account / access</option>
+          <option>Email</option>
+          <option>Security</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Priority</label>
+        <div class="priority-picker">
+          <input type="radio" name="priority" id="pri-low" value="Low">
+          <label for="pri-low" class="p-low">Low</label>
+          <input type="radio" name="priority" id="pri-medium" value="Medium" checked>
+          <label for="pri-medium" class="p-medium">Medium</label>
+          <input type="radio" name="priority" id="pri-high" value="High">
+          <label for="pri-high" class="p-high">High</label>
+          <input type="radio" name="priority" id="pri-critical" value="Critical">
+          <label for="pri-critical" class="p-critical">Critical</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" placeholder="Laptop won't connect to VPN" required>
+      </div>
+
+      <div class="field">
+        <label for="description">Describe the issue</label>
+        <textarea id="description" placeholder="What's happening, when it started, and anything you've already tried." required></textarea>
+      </div>
+
+      <div class="msg" id="formMsg"></div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Submit ticket</button>
+    </form>
+
+    <aside class="stub">
+      <div class="eyebrow">IT TICKET DESK</div>
+      <div class="ticket-id" id="stubId">IT-————</div>
+      <span class="status-badge" id="stubStatus">Draft</span>
+      <dl>
+        <div>
+          <dt>Priority</dt>
+          <dd><span class="priority-tag p-medium" id="stubPriority">Medium</span></dd>
+        </div>
+        <div>
+          <dt>Requester</dt>
+          <dd id="stubName">—</dd>
+        </div>
+        <div>
+          <dt>Mobile</dt>
+          <dd id="stubMobile">—</dd>
+        </div>
+        <div>
+          <dt>Category</dt>
+          <dd id="stubCategory">—</dd>
+        </div>
+        <div>
+          <dt>Subject</dt>
+          <dd id="stubSubject">—</dd>
+        </div>
+        <div>
+          <dt>Logged</dt>
+          <dd id="stubDate">—</dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // Set this once to your Apps Script web app URL (ends in /exec).
+  // This is the ONLY place the Sheet connection lives — it is not
+  // shown or editable on the page itself.
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYsHGSO7pb9w2mUh9Z4JH7idu3UbDeAQ1Q5LR3FRYcE-MOpvK1dQbWv81H13EZT6Qx/exec";
+
+  var priorityClass = {Low:'p-low', Medium:'p-medium', High:'p-high', Critical:'p-critical'};
+
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf('PASTE_YOUR') === 0){
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Ticket desk not connected';
+  }
+
+  function currentPriority(){
+    var checked = document.querySelector('input[name="priority"]:checked');
+    return checked ? checked.value : 'Medium';
+  }
+
+  function updateStub(){
+    var name = document.getElementById('name').value.trim();
+    var mobile = document.getElementById('mobile').value.trim();
+    var category = document.getElementById('category').value;
+    var subject = document.getElementById('subject').value.trim();
+    var pri = currentPriority();
+
+    document.getElementById('stubName').textContent = name || '—';
+    document.getElementById('stubMobile').textContent = mobile || '—';
+    document.getElementById('stubCategory').textContent = category || '—';
+    document.getElementById('stubSubject').textContent = subject || '—';
+
+    var tag = document.getElementById('stubPriority');
+    tag.textContent = pri;
+    tag.className = 'priority-tag ' + priorityClass[pri];
+  }
+
+  ['name','mobile','category','subject'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', updateStub);
+    document.getElementById(id).addEventListener('change', updateStub);
+  });
+  document.querySelectorAll('input[name="priority"]').forEach(function(r){
+    r.addEventListener('change', updateStub);
+  });
+
+  var ICONS = {
+    ok: '<svg class="msg-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2454C7"/><path d="M7.5 12.5l3 3 6-6.5" stroke="#EAF1FB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    err: '<svg class="msg-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#A63A2E"/><path d="M12 7v6M12 16.5v.01" stroke="#F5E2DE" stroke-width="2" stroke-linecap="round"/></svg>'
+  };
+
+  function showMsg(html, type){
+    var el = document.getElementById('formMsg');
+    el.innerHTML = ICONS[type] + '<div class="msg-body">' + html + '</div>';
+    el.className = 'msg show ' + type;
+  }
+  function hideMsg(){
+    var el = document.getElementById('formMsg');
+    el.className = 'msg';
+    el.innerHTML = '';
+  }
+
+  document.getElementById('ticketForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    hideMsg();
+
+    if(!SCRIPT_URL || SCRIPT_URL.indexOf('PASTE_YOUR') === 0){
+      showMsg('This ticket desk is not connected to a Sheet yet — contact IT.', 'err');
+      return;
+    }
+
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var mobile = document.getElementById('mobile').value.trim();
+    var department = document.getElementById('department').value;
+    var category = document.getElementById('category').value;
+    var priority = currentPriority();
+    var subject = document.getElementById('subject').value.trim();
+    var description = document.getElementById('description').value.trim();
+
+    if(!name || !email || !mobile || !department || !category || !subject || !description){
+      showMsg('Fill in every field before submitting.', 'err');
+      return;
+    }
+
+    var timeStr = new Date().toLocaleString();
+
+    var payload = {
+      timestamp: timeStr,
+      name: name,
+      email: email,
+      mobile: mobile,
+      department: department,
+      category: category,
+      priority: priority,
+      subject: subject,
+      description: description,
+      status: 'Open'
+    };
+
+    var submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    }).then(function(res){ return res.json(); })
+    .then(function(res){
+      var id = res.ticketId || '—';
+      document.getElementById('stubId').textContent = id;
+      document.getElementById('stubStatus').textContent = 'Open';
+      document.getElementById('stubDate').textContent = timeStr;
+      showMsg('Ticket ' + id + ' logged. A confirmation has been sent to ' + email + '. Please connect with the IT Team with the Ticket ID for immediate response.', 'ok');
+      document.getElementById('ticketForm').reset();
+      document.getElementById('pri-medium').checked = true;
+      updateStub();
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit ticket';
+    }).catch(function(){
+      showMsg('The ticket was likely logged, but we couldn\'t confirm the ticket number here. Please connect with the IT Team with the Ticket ID for immediate response.', 'err');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit ticket';
+    });
+  });
+
+  updateStub();
+})();
+</script>
+
+</body>
+</html>
