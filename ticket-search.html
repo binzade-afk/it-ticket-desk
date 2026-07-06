@@ -344,8 +344,8 @@
         <path d="M7 9l2 2-2 2M12.5 13h3" stroke="#7FA8F0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-    <h1>SEARCH TICKETS</h1>
-    <span class="subtitle">FIND · CHECK · TRACK</span>
+    <h1>SEARCH YOUR TICKET</h1>
+    <span class="subtitle">FIND · TRACK · CLOSE</span>
   </div>
 </header>
 
@@ -357,11 +357,11 @@
     <div class="search-grid">
       <div class="search-field">
         <label for="searchId">Ticket ID</label>
-        <input type="text" id="searchId" placeholder="IT-0001" autocomplete="off">
+        <input type="text" id="searchId" placeholder="Enter Your ticket ID(IT-0001)" autocomplete="off">
       </div>
       <div class="search-field">
         <label for="searchSubject">Subject</label>
-        <input type="text" id="searchSubject" placeholder="Laptop VPN issue" autocomplete="off">
+        <input type="text" id="searchSubject" placeholder="Enter your ticket Subject" autocomplete="off">
       </div>
     </div>
 
@@ -427,107 +427,133 @@
 </div>
 
 <script>
-(function(){
+(function () {
+
   var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYsHGSO7pb9w2mUh9Z4JH7idu3UbDeAQ1Q5LR3FRYcE-MOpvK1dQbWv81H13EZT6Qx/exec";
 
-  var searchIdInput = document.getElementById('searchId');
-  var searchSubjectInput = document.getElementById('searchSubject');
-  var searchBtn = document.getElementById('searchBtn');
-  var msgBox = document.getElementById('msgBox');
-  var resultCard = document.getElementById('resultCard');
+  var searchIdInput = document.getElementById("searchId");
+  var searchSubjectInput = document.getElementById("searchSubject");
+  var searchBtn = document.getElementById("searchBtn");
+  var msgBox = document.getElementById("msgBox");
+  var resultCard = document.getElementById("resultCard");
 
-  function showMsg(text, type){
-    var el = msgBox;
-    var icon = type === 'ok' 
-      ? '<svg class="msg-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2454C7"/><path d="M7.5 12.5l3 3 6-6.5" stroke="#EAF1FB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      : '<svg class="msg-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#A63A2E"/><path d="M12 7v6M12 16.5v.01" stroke="#F5E2DE" stroke-width="2" stroke-linecap="round"/></svg>';
-    el.innerHTML = icon + '<div>' + text + '</div>';
-    el.className = 'msg show ' + type;
+  function showMsg(text, type) {
+    msgBox.innerHTML = text;
+    msgBox.className = "msg show " + type;
   }
 
-  function hideMsg(){
-    msgBox.className = 'msg';
-    msgBox.innerHTML = '';
+  function hideMsg() {
+    msgBox.innerHTML = "";
+    msgBox.className = "msg";
   }
 
-  function hideResult(){
-    resultCard.className = 'result-card';
+  function hideResult() {
+    resultCard.className = "result-card";
   }
 
-  function formatStatus(status){
-    if(status === 'Open') return 'OPEN';
-    if(status === 'In Progress') return 'IN PROGRESS';
-    if(status === 'Closed') return 'CLOSED';
+  function formatStatus(status) {
+    status = status || "";
+    if (status === "Open") return "OPEN";
+    if (status === "In Progress") return "IN PROGRESS";
+    if (status === "Closed") return "CLOSED";
     return status.toUpperCase();
   }
 
-  function getStatusClass(status){
-    var s = status.toLowerCase();
-    if(s === 'open') return 'open';
-    if(s === 'in progress') return 'inprogress';
-    if(s === 'closed') return 'closed';
-    return 'open';
+  function getStatusClass(status) {
+    status = (status || "").toLowerCase();
+
+    if (status === "open") return "open";
+    if (status === "in progress") return "inprogress";
+    if (status === "closed") return "closed";
+
+    return "open";
   }
 
-  function displayResult(ticket){
-    document.getElementById('resultId').textContent = ticket.ticketId || '—';
-    document.getElementById('statusText').textContent = formatStatus(ticket.status);
-    document.getElementById('resultStatus').className = 'status-display ' + getStatusClass(ticket.status);
-    document.getElementById('resultName').textContent = ticket.name || '—';
-    document.getElementById('resultPriority').textContent = ticket.priority || '—';
-    document.getElementById('resultCategory').textContent = ticket.category || '—';
-    document.getElementById('resultEmail').textContent = ticket.email || '—';
-    document.getElementById('resultMobile').textContent = ticket.mobile || '—';
-    document.getElementById('resultDept').textContent = ticket.department || '—';
-    document.getElementById('resultTime').textContent = ticket.timestamp || '—';
-    document.getElementById('resultSubject').textContent = ticket.subject || '—';
-    document.getElementById('resultRemark').textContent = ticket.remarks || '—';
-    
-    resultCard.className = 'result-card show';
+  function displayResult(ticket) {
+
+    document.getElementById("resultId").textContent = ticket.ticketId || "-";
+    document.getElementById("statusText").textContent = formatStatus(ticket.status);
+    document.getElementById("resultStatus").className = "status-display " + getStatusClass(ticket.status);
+
+    document.getElementById("resultName").textContent = ticket.name || "-";
+    document.getElementById("resultPriority").textContent = ticket.priority || "-";
+    document.getElementById("resultCategory").textContent = ticket.category || "-";
+    document.getElementById("resultEmail").textContent = ticket.email || "-";
+    document.getElementById("resultMobile").textContent = ticket.mobile || "-";
+    document.getElementById("resultDept").textContent = ticket.department || "-";
+    document.getElementById("resultTime").textContent = ticket.timestamp || "-";
+    document.getElementById("resultSubject").textContent = ticket.subject || "-";
+    document.getElementById("resultRemark").textContent = ticket.remarks || "-";
+
+    resultCard.className = "result-card show";
   }
 
-  searchBtn.addEventListener('click', function(){
+  searchBtn.addEventListener("click", function () {
+
     hideMsg();
+    hideResult();
+
     var queryId = searchIdInput.value.trim().toUpperCase();
-    var querySubject = searchSubjectInput.value.trim();
-    
-    if(!queryId && !querySubject){
-      showMsg('Enter either a Ticket ID or Subject to search.', 'err');
+    var querySubject = searchSubjectInput.value.trim().toLowerCase();
+
+    if (queryId === "" || querySubject === "") {
+      showMsg("Please enter both Ticket ID and Subject.", "err");
       return;
     }
 
     searchBtn.disabled = true;
-    searchBtn.textContent = 'Searching…';
+    searchBtn.textContent = "Searching...";
 
-    var params = [];
-    if(queryId) params.push('id=' + encodeURIComponent(queryId));
-    if(querySubject) params.push('subject=' + encodeURIComponent(querySubject));
-    var url = SCRIPT_URL + '?search=1&' + params.join('&');
+    var url =
+      SCRIPT_URL +
+      "?search=1&id=" +
+      encodeURIComponent(queryId) +
+      "&subject=" +
+      encodeURIComponent(querySubject);
 
     fetch(url)
-      .then(function(res){ return res.json(); })
-      .then(function(res){
-        if(res.result === 'ok' && res.ticket){
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (res) {
+
+        searchBtn.disabled = false;
+        searchBtn.textContent = "Search";
+
+        if (!res || res.result !== "ok" || !res.ticket) {
+          showMsg("Invalid Ticket ID or Subject.", "err");
+          return;
+        }
+
+        var ticketId = (res.ticket.ticketId || "").trim().toUpperCase();
+        var subject = (res.ticket.subject || "").trim().toLowerCase();
+
+        if (ticketId === queryId && subject === querySubject) {
           displayResult(res.ticket);
         } else {
-          hideResult();
-          showMsg('Ticket not found. Check the ID or subject and try again.', 'err');
+          showMsg("Invalid Ticket ID or Subject.", "err");
         }
+
+      })
+      .catch(function (err) {
+
+        console.log(err);
+
         searchBtn.disabled = false;
-        searchBtn.textContent = 'Search';
-      }).catch(function(){
-        hideResult();
-        showMsg('Error searching. Check your connection and try again.', 'err');
-        searchBtn.disabled = false;
-        searchBtn.textContent = 'Search';
+        searchBtn.textContent = "Search";
+
+        showMsg("Error searching ticket.", "err");
+
       });
+
   });
 
-  searchIdInput.addEventListener('keypress', function(e){
-    if(e.key === 'Enter') searchBtn.click();
+  searchIdInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") searchBtn.click();
   });
-  searchSubjectInput.addEventListener('keypress', function(e){
-    if(e.key === 'Enter') searchBtn.click();
+
+  searchSubjectInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") searchBtn.click();
   });
 
 })();
