@@ -420,7 +420,7 @@
     </div>
 
     <div class="nav-link">
-      <a href="it-ticket-desk.html">← Back to submit a new ticket</a>
+      <a href="index.html">← Back to submit a new ticket</a>
     </div>
   </div>
 
@@ -490,7 +490,15 @@
     hideMsg();
     var queryId = searchIdInput.value.trim().toUpperCase();
     var querySubject = searchSubjectInput.value.trim();
-    
+
+    if (!queryId) {
+    msgBox.textContent = "Invalid Ticket ID or Subject.";
+    return;
+    }
+    if (!querySubject) {
+    msgBox.textContent = "Invalid Ticket ID or Subject.";
+    return;
+    }
     if(!queryId && !querySubject){
       showMsg('Enter either a Ticket ID or Subject to search.', 'err');
       return;
