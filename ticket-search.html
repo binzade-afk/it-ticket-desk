@@ -491,19 +491,11 @@
     var queryId = searchIdInput.value.trim().toUpperCase();
     var querySubject = searchSubjectInput.value.trim();
 
-    if (!queryId) {
-    msgBox.textContent = "Invalid Ticket ID or Subject.";
+    if (!queryId || !querySubject) {
+    hideResult();
+    showMsg('Please enter both Ticket ID and Subject.', 'err');
     return;
     }
-    if (!querySubject) {
-    msgBox.textContent = "Invalid Ticket ID or Subject.";
-    return;
-    }
-    if(!queryId && !querySubject){
-      showMsg('Enter either a Ticket ID or Subject to search.', 'err');
-      return;
-    }
-
     searchBtn.disabled = true;
     searchBtn.textContent = 'Searching…';
 
@@ -515,11 +507,15 @@
     fetch(url)
       .then(function(res){ return res.json(); })
       .then(function(res){
-        if(res.result === 'ok' && res.ticket){
-          displayResult(res.ticket);
+       if (res.result === 'ok' &&
+           res.ticket &&
+           res.ticket.ticketId.toUpperCase() === queryId &&
+           res.ticket.subject.trim().toLowerCase() === querySubject.toLowerCase()
+        ){
+           displayResult(res.ticket);
         } else {
-          hideResult();
-          showMsg('Ticket not found. Check the ID or subject and try again.', 'err');
+           hideResult();
+           showMsg('Invalid Ticket ID or Subject.', 'err');
         }
         searchBtn.disabled = false;
         searchBtn.textContent = 'Search';
