@@ -560,8 +560,7 @@
 
       <div class="field">
         <label for="attachment">Attachment (Optional)</label>
-        <input type="file" id="attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls" />
-        <div style="font-size:11px; color:var(--slate-light); margin-top:6px;">Allowed: PDF, DOC, DOCX, JPG, PNG, TXT, XLS, XLSX (Max 5MB)</div>
+        <input type="file" id="attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls,.mp4,.avi,.mov,.mkv,.wmv,.flv,.webm" />
       </div>
 
       <div class="field">
@@ -721,12 +720,6 @@
     // Handle optional file attachment
     if(attachmentInput.files && attachmentInput.files.length > 0){
       var file = attachmentInput.files[0];
-      var maxSize = 5 * 1024 * 1024; // 5MB
-      
-      if(file.size > maxSize){
-        showMsg('File size exceeds 5MB limit. Please choose a smaller file.', 'err');
-        return;
-      }
       
       attachmentName = file.name + ' (' + (file.size / 1024).toFixed(2) + 'KB)';
       
