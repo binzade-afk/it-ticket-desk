@@ -404,6 +404,14 @@
         <div class="result-value" id="resultDept">—</div>
       </div>
       <div class="result-field">
+        <div class="result-label">Shift Time</div>
+        <div class="result-value" id="resultShift">—</div>
+      </div>
+      <div class="result-field">
+        <div class="result-label">Location</div>
+        <div class="result-value" id="resultLocation">—</div>
+      </div>
+      <div class="result-field">
         <div class="result-label">Submitted</div>
         <div class="result-value" id="resultTime">—</div>
       </div>
@@ -481,6 +489,8 @@
     document.getElementById("resultEmail").textContent = ticket.email || "-";
     document.getElementById("resultMobile").textContent = ticket.mobile || "-";
     document.getElementById("resultDept").textContent = ticket.department || "-";
+    document.getElementById("resultShift").textContent = ticket.shift || "-";
+    document.getElementById("resultLocation").textContent = ticket.location || "-";
     document.getElementById("resultTime").textContent = ticket.timestamp || "-";
     document.getElementById("resultSubject").textContent = ticket.subject || "-";
     document.getElementById("resultRemark").textContent = ticket.remarks || "-";
