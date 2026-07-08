@@ -140,6 +140,7 @@
   .field input[type=text],
   .field input[type=email],
   .field input[type=tel],
+  .field input[type=file],
   .field select,
   .field textarea{
     width:100%;
@@ -500,6 +501,27 @@
         </div>
       </div>
 
+      <div class="field row2">
+        <div>
+          <label for="shift">Shift Time</label>
+          <select id="shift" required>
+            <option value="" disabled selected>Select shift</option>
+            <option>General</option>
+            <option>US</option>
+          </select>
+        </div>
+        <div>
+          <label for="location">Location</label>
+          <select id="location" required>
+            <option value="" disabled selected>Select location</option>
+            <option>BLR SH-U4</option>
+            <option>BLR HANTO</option>
+            <option>HYD</option>
+            <option>WFH</option>
+          </select>
+        </div>
+      </div>
+
       <div class="field">
         <label for="category">Issue category</label>
         <select id="category" required>
@@ -534,6 +556,12 @@
       <div class="field">
         <label for="subject">Subject</label>
         <input type="text" id="subject" placeholder="Laptop Not working" required>
+      </div>
+
+      <div class="field">
+        <label for="attachment">Attachment (Optional)</label>
+        <input type="file" id="attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls" />
+        <div style="font-size:11px; color:var(--slate-light); margin-top:6px;">Allowed: PDF, DOC, DOCX, JPG, PNG, TXT, XLS, XLSX (Max 5MB)</div>
       </div>
 
       <div class="field">
@@ -675,16 +703,53 @@
     var email = document.getElementById('email').value.trim();
     var mobile = document.getElementById('mobile').value.trim();
     var department = document.getElementById('department').value;
+    var shift = document.getElementById('shift').value;
+    var location = document.getElementById('location').value;
     var category = document.getElementById('category').value;
     var priority = currentPriority();
     var subject = document.getElementById('subject').value.trim();
     var description = document.getElementById('description').value.trim();
+    var attachmentInput = document.getElementById('attachment');
+    var attachment = null;
+    var attachmentName = '';
 
-    if(!name || !email || !mobile || !department || !category || !subject || !description){
+    if(!name || !email || !mobile || !department || !shift || !location || !category || !subject || !description){
       showMsg('Fill in every field before submitting.', 'err');
       return;
     }
 
+    // Handle optional file attachment
+    if(attachmentInput.files && attachmentInput.files.length > 0){
+      var file = attachmentInput.files[0];
+      var maxSize = 5 * 1024 * 1024; // 5MB
+      
+      if(file.size > maxSize){
+        showMsg('File size exceeds 5MB limit. Please choose a smaller file.', 'err');
+        return;
+      }
+      
+      attachmentName = file.name + ' (' + (file.size / 1024).toFixed(2) + 'KB)';
+      
+      var reader = new FileReader();
+      reader.onload = function(event){
+        attachment = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          data: event.target.result
+        };
+        submitTicket(name, email, mobile, department, shift, location, category, priority, subject, description, attachment, attachmentName);
+      };
+      reader.onerror = function(){
+        showMsg('Error reading file. Please try again.', 'err');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      submitTicket(name, email, mobile, department, shift, location, category, priority, subject, description, null, '');
+    }
+  });
+
+  function submitTicket(name, email, mobile, department, shift, location, category, priority, subject, description, attachment, attachmentName){
     var timeStr = new Date().toLocaleString();
 
     var payload = {
@@ -693,11 +758,20 @@
       email: email,
       mobile: mobile,
       department: department,
+      shift: shift,
+      location: location,
       category: category,
       priority: priority,
       subject: subject,
       description: description,
-      status: 'Open'
+      status: 'Open',
+      attachment: attachment ? {
+        name: attachment.name,
+        size: attachment.size,
+        type: attachment.type,
+        data: attachment.data
+      } : null,
+      attachmentName: attachmentName
     };
 
     var submitBtn = document.getElementById('submitBtn');
@@ -725,7 +799,7 @@
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit ticket';
     });
-  });
+  }
 
   var viewTicketsBtn = document.getElementById('viewTicketsBtn');
   var ticketsTableWrap = document.getElementById('ticketsTableWrap');
